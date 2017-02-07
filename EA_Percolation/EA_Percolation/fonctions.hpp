@@ -22,4 +22,7 @@ double borneInfS(int i, int d);
 std::vector< std::vector<double> > tabTau2(int Niterme, int Njterme, int d );
 double Tau2(int Niterme, int Njterme, int d );
 
+std::vector<std::vector< std::vector<double> > > tabTau3(int Niterme, int Njterme, int Nkterme, int d );
+double Tau3(int Niterme, int Njterme, int Nkterme, int d );
+
 #endif /* fonctions_hpp */

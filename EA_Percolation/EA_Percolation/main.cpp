@@ -13,14 +13,20 @@ using namespace std;
 //using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
-    int d = 20;
+    int d = 40;
 
-    int ni=100;
-    int nj=100;
+    int ni=1000;
+    int nj=1000;
+
    //return Tau1(n, d);
    // high_resolution_clock::time_point t1 = high_resolution_clock::now();
     
-    cout << "Tau 1 = " << Tau2(ni, nj, d) << endl;
+	double res = Tau2(ni, nj, d);
+     cout << "Tau_2 * d /log(2d) = " << res * d/log(2*d)  << endl;
+
+    cout << "Tau_2 / 2 = " << res/2  << endl;
+
+    cout << "borne diag = " << 0.3313/sqrt(d)  << endl;
 
    // high_resolution_clock::time_point t2 = high_resolution_clock::now();
     

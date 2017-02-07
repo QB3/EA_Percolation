@@ -1,10 +1,10 @@
 source("~/EA_Percolation/fonctions.R")
 
-dimension=c(25,30,40)
+dimension=c(20,30,40)
 
 res=NULL
 tau_2_sur_2=NULL
-n_termes_j=1000
+n_termes_j=100
 n_termes_i=100
 
 for(d in dimension){

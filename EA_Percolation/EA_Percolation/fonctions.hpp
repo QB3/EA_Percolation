@@ -13,12 +13,13 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 std::vector<double> tabTau1(int Nterme, int d);
 double Tau1(int Nterme, int d);
 double borneInfS(int i, int d);
 
 std::vector< std::vector<double> > tabTau2(int Niterme, int Njterme, int d );
-
+double Tau2(int Niterme, int Njterme, int d );
 
 #endif /* fonctions_hpp */

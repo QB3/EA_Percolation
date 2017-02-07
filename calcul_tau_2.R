@@ -1,10 +1,11 @@
-source("/home/qbe/Bureau/EA_Percolation/fonctions.R")
+source("~/EA_Percolation/fonctions.R")
 
-dimension=c(2,3,4,5,7,10,20,30,40)
+dimension=c(25,30,40)
+
 res=NULL
 tau_2_sur_2=NULL
 n_termes_j=1000
-n_termes_i=1000
+n_termes_i=100
 
 for(d in dimension){
   borne=borne_tau_2(d, n_termes_i, n_termes_j)

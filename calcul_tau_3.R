@@ -1,4 +1,4 @@
-source("/home/qbe/Bureau/EA_Percolation/fonctions.R")
+source("~/EA_Percolation/fonctions.R")
 
 dimension=c(29:30)
 res=NULL

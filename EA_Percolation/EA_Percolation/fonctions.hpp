@@ -30,4 +30,8 @@ double Tau3(int Niterme, int Njterme, int Nkterme, int d );
 vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d );
 double Tau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d );
 
+vector< vector< vector< vector<double> > > > tabTau4(int NiTau2, int NjTau2, int NkTau3, int Niterme, int Njterme, int Nkterme, int Nlterme, int d );
+double Tau4(int NiTau2, int NjTau2, int NkTau3, int Niterme, int Njterme, int Nkterme, int Nlterme, int d);
+
+
 #endif /* fonctions_hpp */

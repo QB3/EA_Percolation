@@ -15,14 +15,19 @@
 #include <iostream>
 #include <algorithm>
 
-std::vector<double> tabTau1(int Nterme, int d);
+using namespace std;
+
+vector<double> tabTau1(int Nterme, int d);
 double Tau1(int Nterme, int d);
 double borneInfS(int i, int d);
 
-std::vector< std::vector<double> > tabTau2(int Niterme, int Njterme, int d );
+vector< vector<double> > tabTau2(int Niterme, int Njterme, int d );
 double Tau2(int Niterme, int Njterme, int d );
 
-std::vector<std::vector< std::vector<double> > > tabTau3(int Niterme, int Njterme, int Nkterme, int d );
+vector< vector< vector<double> > > tabTau3(int Niterme, int Njterme, int Nkterme, int d );
 double Tau3(int Niterme, int Njterme, int Nkterme, int d );
+
+vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d );
+double Tau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d );
 
 #endif /* fonctions_hpp */

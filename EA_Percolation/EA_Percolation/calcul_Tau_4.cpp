@@ -13,28 +13,24 @@ using namespace std;
 using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
-	int d = 20;
+	int d = 24;
 	int ni=1000;
 	int nj=100;//10-100
-	int nk=100;//10-100
+	int nk=10;//10-100
 	int nl=10;//10-100
-	int nm=10;
 	int niTau2=10000;//10000
 	int njTau2=1000;//1000
 	int niTau3 = 1000;//1000-10000
 	int njTau3=1000;//1000
-	int nkTau3=1000;//100-1000
-	int niTau4=1000;
-	int njTau4=100;
-	int nkTau4=100;
-	int nlTau4=100;
+	int nkTau3=100;//100-1000
 
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
     
-	double res = Tau5(niTau2, njTau2, niTau3, njTau3, nkTau3, niTau4, njTau4, nkTau4, nlTau4, ni, nj, nk, nl,nm, d);
-	cout << "d = " << d  << " ni = " << ni << " nj = " << nj << " nk = "<< nk << " nl = " << nl << " nm = "<< nm << endl;
-	cout << "Tau_5 * d * 2 /log(2d) /5 = " << res * 2 * d /log(2*d) /5  << endl;
-	cout << "Tau_5 / 5 = " << res/5  << endl;
+	double res = Tau4(niTau2, njTau2, niTau3, njTau3, nkTau3, ni, nj, nk, nl, d);
+	cout << "d = " << d  << " ni = " << ni << " nj = " << nj << " nk = "<< nk << " nl = " << nl << endl;
+	cout << "Tau_4 * d * 2 /log(2d) /4 = " << res * d /log(2*d) /2  << endl;
+	cout << "Tau_4 / 4 = " << res/4  << endl;
+
 	cout << "borne diag = " << 0.3313/sqrt(d)  << endl;
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();

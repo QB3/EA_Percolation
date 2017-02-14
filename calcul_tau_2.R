@@ -1,11 +1,11 @@
 source("~/EA_Percolation/fonctions.R")
 
-dimension=c(20,30,40)
+dimension=c(20, 25, 30)
 
 res=NULL
 tau_2_sur_2=NULL
-n_termes_j=100
-n_termes_i=100
+n_termes_j=10000
+n_termes_i=1000
 
 for(d in dimension){
   borne=borne_tau_2(d, n_termes_i, n_termes_j)

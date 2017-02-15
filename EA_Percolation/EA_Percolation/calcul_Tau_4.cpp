@@ -14,15 +14,15 @@ using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
 	int d = 24;
-	int ni=1000;//1000 à tester : 10000
-	int nj=100;//100 à tester : 1000
+	int ni=10000;//1000 à tester : 10000
+	int nj=1000;//100 à tester : 1000
 	int nk=10;//100 à tester : 100
 	int nl=10;//10
 	int niTau2=10000;//10000
 	int njTau2=1000;//1000
-	int niTau3 = 1000;//1000
-	int njTau3=100;//100
-	int nkTau3=10;//10
+	int niTau3 = 10000;//1000
+	int njTau3=1000;//100
+	int nkTau3=100;//10
 
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
     

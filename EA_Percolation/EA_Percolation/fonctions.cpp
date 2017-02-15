@@ -162,6 +162,7 @@ double Tau3(int Niterme, int Njterme, int Nkterme, int d ){
 }
 
 //renvoie un tableau de taille Niterme + 1 * Njterme + 1 * Nkterme +1 * Nlterme + 1 
+//à enventuellement rajouter, prendre le min avec la borne fine à chaque étape 
 vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int NiNeeded, int d ){
 	//vector< vector<double> > tabOpt(tabTau2(NiTau2, NjTau2, d));
 	vector< vector<double> > tabOpt(recopieTau2(NiTau2, NjTau2, Njterme, Nkterme, d));
@@ -237,38 +238,55 @@ vector< vector< vector<double> > > recopieTau3(int NiTau2, int NjTau2, int NiTau
 	return tabPetit;
 }
 
-//tabtau4 est déjà optimisé
-vector< vector< vector< vector<double> > > > tabTau4(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int Niterme, int Njterme, int Nkterme, int Nlterme, int d ){
+vector< vector< vector< vector<double> > > > tabTau4(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int Niterme, int Njterme, int Nkterme, int Nlterme, int NiNeeded, int d ){
 
 	cout << "debut"  << endl;
-	//vector < vector< vector<double> > > tabOpt(tabTau3Opt(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, d));
 	vector < vector< vector<double> > > tabOpt(recopieTau3(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, Njterme, Nkterme, Nlterme, d));
 	cout << "fin du calcul de tabTau3"  << endl;
-
-	vector< vector < vector< vector<double> > > > tab(Niterme+1, vector< vector< vector<double> > >(Njterme+1, vector < vector<double> > (Nkterme+1, vector<double>(Nlterme+1))));
-
 	double borne_fine;
-	if(Niterme==1000){
+	if(Niterme==100){
+		borne_fine=0.75;
+	}else if(Niterme==1000){
 		borne_fine=0.39;
 	}else{
-		borne_fine=0.20979;
+		borne_fine=0.20979;//borne pour 10 000
 	}
+	tabOpt[0][0][0]=borne_fine;	
+	cout << "fin initialisation"  << endl;
 
+	for(int i = Niterme - 1; i != NiNeeded-1 ; i--){
+		//on print l'étape en cours
+		if(i%10==0){
+			cout << "i= " << i  << endl;
+		}
+		for(int j = Njterme-1; j!=-1; j--){
+			for(int k =Nkterme-1; k!=-1; k--){ 
+				for (int l=Nlterme-1;l!=-1; l--){ 			
+					double s_i = borneInfS(i, d);
+					double s_j = borneInfS(j, d);
+					double s_k = borneInfS(k, d);
+					double s_l = borneInfS(l, d);
+					double B_0_1 = max(i-j, 0);
+					double B_1_2 = max(j-k, 0);
+					double B_2_3 = max(k-l, 0);
+					tabOpt[j][k][l]=(1 + s_i * tabOpt[j][k][l] + (s_j+B_0_1) * tabOpt[j+1][k][l] + (s_k+B_1_2) * tabOpt[j][k+1][l] + (s_l+B_2_3) * tabOpt[j][k][l+1])/(s_i+s_j+s_k+s_l+B_0_1+B_1_2+B_2_3+l);
+				}
+			}
+		}
+    	}
+
+	vector< vector < vector< vector<double> > > > tab(NiNeeded+1, vector< vector< vector<double> > >(Njterme+1, vector < vector<double> > (Nkterme+1, vector<double>(Nlterme+1))));
+	tab[NiNeeded]=tabOpt;
 	//fin de l'initialisation du cube Nterme+1
 
-	for(int j=Njterme; j!=0; j--){
+	/*for(int j=Njterme; j!=0; j--){
 		for(int k = Nkterme; k!=-1; k--){
 			for(int l =Nlterme; l!=-1; l--){
 				tab[Niterme][j][k][l]=min(tabOpt[j][k][l], borne_fine);
 			}
 		}
-	}
-
-	tab[Niterme][0][0][0]=borne_fine;
-	
-	cout << "fin initialisation"  << endl;
-
-	for(int i = Niterme - 1; i != 0 ; i--){
+	}*/
+	for(int i = NiNeeded - 1; i != 0 ; i--){
 		//on print l'étape en cours
 		if(i%10==0){
 			cout << "i= " << i  << endl;
@@ -311,12 +329,12 @@ vector< vector< vector< vector<double> > > > tabTau4(int NiTau2, int NjTau2, int
 
 }
 double Tau4(int NiTau2, int NjTau2,int NiTau3, int NjTau3, int NkTau3, int Niterme, int Njterme, int Nkterme, int Nlterme, int d){
-	vector< vector < vector< vector<double> > > > tab(tabTau4(NiTau2, NjTau2, NiTau3,NjTau3, NkTau3, Niterme, Njterme, Nkterme, Nlterme, d ));
+	vector< vector < vector< vector<double> > > > tab(tabTau4(NiTau2, NjTau2, NiTau3,NjTau3, NkTau3, Niterme, Njterme, Nkterme, Nlterme, 1, d ));
 	return tab[1][0][0][0];
 }
 
 vector< vector< vector< vector<double> > > > recopieTau4(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Njterme, int Nkterme, int Nlterme, int Nmterme, int d){
-	vector< vector < vector< vector<double> > > > tabGrand(tabTau4(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, d ));
+	vector< vector < vector< vector<double> > > > tabGrand(tabTau4(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, Njterme, d ));
 	vector< vector < vector< vector<double> > > >  tabPetit(Njterme+1, vector< vector < vector<double> > >(Nkterme+1, vector< vector<double> >(Nlterme+1, vector<double>(Nmterme +1))));
 	for(int j=Njterme; j!=0; j--){
 		cout << "j = " << j << endl;
@@ -331,46 +349,59 @@ vector< vector< vector< vector<double> > > > recopieTau4(int NiTau2, int NjTau2,
 	return tabPetit;
 }
 
-/*
-vector< vector< vector< vector< vector<double> > > > > tabTau5(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Niterme, int Njterme, int Nkterme, int Nlterme, int Nmterme, int d ){
+
+vector< vector< vector< vector< vector<double> > > > > tabTau5(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Niterme, int Njterme, int Nkterme, int Nlterme, int Nmterme, int NiNeeded, int d ){
 	
 	cout << "debut"  << endl;
-	//vector< vector < vector< vector<double> > > > tabOpt(tabTau4(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, d ));
 	vector< vector < vector< vector<double> > > > tabOpt(recopieTau4(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, Njterme, Nkterme, Nlterme, Nmterme, d ));
 	cout << "fin du calcul de tabTau4"  << endl;
 
-	vector <vector< vector < vector< vector<double> > > > > tab(Niterme+1, vector< vector< vector< vector<double> > >>(Njterme+1, vector< vector < vector<double> > >(Nkterme+1, vector< vector<double> >(Nlterme+1, vector<double>(Nmterme +1)))));
-
-	cout << "fin creation tabTau5"  << endl;
 	double borne_fine;
 	if(Niterme==100){
 		borne_fine=1.17;
 	}else if (Niterme ==1000){
 		borne_fine=0.68;
 	}else{
-		borne_fine=0.04;
+		borne_fine=0.4;//borne pour 10 000 //tester 100 000
 	}
+	tabOpt[0][0][0][0]=borne_fine;
 
-	//fin de l'initialisation du cube Nterme+1
-	for(int j=Njterme; j!=0; j--){
-		cout << "j = " << j << endl;
-		for(int k = Nkterme; k!=-1; k--){
-			for(int l =Nlterme; l!=-1; l--){
-				for (int m=Nmterme; m!=-1; m--){
-					tab[Niterme][j][k][l][m]=min(tabOpt[j][k][l][m], borne_fine);
-				}
-			}
-		}
-	}
-	tab[Niterme][0][0][0][0]=borne_fine;
-	cout << "fin initialisation tabTau5"  << endl;
-
-	for(int i = Niterme - 1; i != 0 ; i--){
+	for(int i = Niterme - 1; i != NiNeeded-1 ; i--){
 		
 		if(i%10==0){
 			cout << "i= " << i  << endl;//on print l'étape en cours
 		}
 
+		for(int j = Njterme-1; j!=-1; j--){
+			
+			for(int k =Nkterme-1; k!=-1; k--){ 
+				for (int l=Nlterme-1;l!=-1; l--){ 
+					for(int m=Nmterme; m!=-1; m--){			
+						double s_i = borneInfS(i, d);
+						double s_j = borneInfS(j, d);
+						double s_k = borneInfS(k, d);
+						double s_l = borneInfS(l, d);
+						double s_m = borneInfS(m, d);
+						double B_0_1 = max(i-j, 0);
+						double B_1_2 = max(j-k, 0);
+						double B_2_3 = max(k-l, 0);
+						double B_3_4 = max(l-m, 0);
+						tabOpt[j][k][l][m]=(1 + s_i * tabOpt[j][k][l][m] + (s_j+B_0_1) * tabOpt[j+1][k][l][m] + (s_k+B_1_2) * tabOpt[j][k+1][l][m] + (s_l+B_2_3) * tabOpt[j][k][l+1][m] + (s_m + B_3_4) * tabOpt[j][k][l][m+1] )/(s_i + s_j + s_k + s_l + s_m + B_0_1 + B_1_2 + B_2_3 + B_3_4 + m);
+					}
+				}
+			}
+		}
+    	}
+
+	vector <vector< vector < vector< vector<double> > > > > tab(NiNeeded+1, vector< vector< vector< vector<double> > >>(Njterme+1, vector< vector < vector<double> > >(Nkterme+1, vector< vector<double> >(Nlterme+1, vector<double>(Nmterme +1)))));
+	cout << "fin creation tabTau5"  << endl;
+	tab[NiNeeded]=tabOpt;
+
+	for(int i = NiNeeded - 1; i != 0 ; i--){
+		
+		if(i%10==0){
+			cout << "i= " << i  << endl;//on print l'étape en cours
+		}
 		tab[i][Njterme]=tabOpt[Njterme];
 		//cout << "fin initialisation cube i,j"  << endl;
 
@@ -381,19 +412,19 @@ vector< vector< vector< vector< vector<double> > > > > tabTau5(int NiTau2, int N
 			for( int k=Nkterme; k!=-1; k--){
 				for(int l=Nlterme; l!=-1; l--){
 					//cout << "k = " << k << " l = " << l << endl;
-					tab[i][j][k][l][Nmterme]=tab[Niterme][j][k][l][Nmterme];
+					tab[i][j][k][l][Nmterme]=tab[NiNeeded][j][k][l][Nmterme];
 				}
 			}
 			//cout << j  << endl;
 			for(int k=Nkterme; k!=-1; k--){
 				for(int m=Nmterme; m!=-1; m--){
-					tab[i][j][k][Nlterme][m]=tab[Niterme][j][k][Nlterme][m];
+					tab[i][j][k][Nlterme][m]=tab[NiNeeded][j][k][Nlterme][m];
 				}
 			}
 			//cout << j  << endl;
 			for(int l =Nlterme; l!=-1; l--){
 				for(int m=Nmterme; m!=-1; m--){
-					tab[i][j][Nkterme][l][m]=tab[Niterme][j][Nkterme][l][m];
+					tab[i][j][Nkterme][l][m]=tab[NiNeeded][j][Nkterme][l][m];
 				}
 			}
 			//cout << "fin initialisation cube k,i,j"  << endl;
@@ -418,15 +449,12 @@ vector< vector< vector< vector< vector<double> > > > > tabTau5(int NiTau2, int N
 		}
     	}
 	return tab;
-
-
 }
 double Tau5(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Niterme, int Njterme, int Nkterme, int Nlterme, int Nmterme, int d ){
 
-	vector <vector< vector < vector< vector<double> > > > > tab(tabTau5(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, Niterme, Njterme, Nkterme, Nlterme, Nmterme, d));
+	vector <vector< vector < vector< vector<double> > > > > tab(tabTau5(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, Niterme, Njterme, Nkterme, Nlterme, Nmterme,1, d));
 	return tab[1][0][0][0][0];
 }
-*/
 
 
 

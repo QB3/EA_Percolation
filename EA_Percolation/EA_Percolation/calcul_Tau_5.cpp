@@ -14,19 +14,19 @@ using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
 	int d = 22;
-	int ni=1000;
-	int nj=1000;//10-100
+	int ni=10000;
+	int nj=100;//10-100
 	int nk=10;//10-100
 	int nl=10;//10-100
 	int nm=10;
 	int niTau2=10000;//10000
 	int njTau2=1000;//1000
-	int niTau3 = 1000;//1000-10000
-	int njTau3=100;//1000
-	int nkTau3=10;//100-1000
-	int niTau4=1000;
-	int njTau4=100;
-	int nkTau4=10;
+	int niTau3 = 10000;//1000-10000
+	int njTau3=1000;//1000
+	int nkTau3=100;//100-1000
+	int niTau4=10000;//10000
+	int njTau4=1000;//1000
+	int nkTau4=10;//100
 	int nlTau4=10;
 
     high_resolution_clock::time_point t1 = high_resolution_clock::now();

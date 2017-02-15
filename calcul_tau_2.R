@@ -20,5 +20,5 @@ t(rbind(dimension, borne_diag,tau_2_sur_2, res))
 
 # borne_tau_2(30, n_termes_i, n_termes_j)
 
-# tab=borne_tau_2(20, 1000, 1000)
-# tab=as.data.frame(tab)
+tab=borne_tau_2(20, 10000, 1000)
+tab=as.data.frame(tab)

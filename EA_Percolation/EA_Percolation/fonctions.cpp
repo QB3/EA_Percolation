@@ -122,8 +122,9 @@ vector< vector< vector<double> > > tabTau3(int Niterme, int Njterme, int Nkterme
 	vector < vector< vector<double> > > tab(Niterme+1, vector< vector<double> >(Njterme+1, vector<double>(Nkterme+1)));
 	tab[Niterme] = tabTau2(Njterme,Nkterme, d);
 	//à modifier
-	double A=1.00738;
-	double borne_fine=pow(12, 1.0/3)*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/12)/(Niterme *A*A/12);
+	double A=0.39255;
+	double borne_fine=2*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/8)/(Niterme* A*A/8);
+	//double borne_fine=pow(12, 1.0/3)*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/12)/(Niterme *A*A/12);
 
 	tab[Niterme][0][0]=borne_fine;
 	for(int j = 1; j != Njterme ; j++){
@@ -167,8 +168,11 @@ vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterm
 	//vector< vector<double> > tabOpt(tabTau2(NiTau2, NjTau2, d));
 	vector< vector<double> > tabOpt(recopieTau2(NiTau2, NjTau2, Njterme, Nkterme, d));
 
-	double A=1.00738;
-	double borne_fine=pow(12, 1.0/3)*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/12)/(Niterme *A*A/12);
+
+	double A=0.39255;
+	double borne_fine=2*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/8)/(Niterme* A*A/8);
+	//double A=1.00738;
+	//double borne_fine=pow(12, 1.0/3)*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/12)/(Niterme *A*A/12);
 	
 	tabOpt[0][0]=borne_fine;
 	for(int i = Niterme - 1; i != NiNeeded-1 ; i--){

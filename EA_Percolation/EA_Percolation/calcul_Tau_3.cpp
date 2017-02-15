@@ -5,10 +5,10 @@ using namespace std;
 using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
-	int d = 20; //des choix atucieux de ni, nj, .. sont mis en commentaires
-	int ni=1000; //10000
-	int nj=100; //1000
-	int nk=10; //100 
+	int d = 25; //des choix atucieux de ni, nj, .. sont mis en commentaires
+	int ni=10000; //10000
+	int nj=1000; //1000
+	int nk=100;//100 
 	//int nl=10;
 	int niTau2=10000;//10000
 	int njTau2=1000;//1000

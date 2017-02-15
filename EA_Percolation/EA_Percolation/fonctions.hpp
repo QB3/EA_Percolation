@@ -22,13 +22,15 @@ double Tau1(int Nterme, int d);
 double borneInfS(int i, int d);
 
 vector< vector<double> > tabTau2(int Niterme, int Njterme, int d );
+vector< vector<double> > tabTau2(int Niterme, int Njterme, int NiNeeded, int d );
 double Tau2(int Niterme, int Njterme, int d );
+double Tau2(int Niterme, int Njterme, int NiNeeded, int d );
 vector< vector<double> > recopieTau2(int NiTau2, int NjTau2, int Njterme, int Nkterme, int d);
 
 vector< vector< vector<double> > > tabTau3(int Niterme, int Njterme, int Nkterme, int d );
 double Tau3(int Niterme, int Njterme, int Nkterme, int d );
 
-vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d );
+vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int NiNeeded, int d );
 double Tau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d );
 vector< vector< vector<double> > > recopieTau3(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int Njterme, int Nkterme, int Nlterme, int d );
 

@@ -1,10 +1,10 @@
 source("~/EA_Percolation/fonctions.R")
 
-dimension=c(20, 25, 30)
+dimension=c(10, 20, 40)
 
 res=NULL
 tau_2_sur_2=NULL
-n_termes_j=10000
+n_termes_j=1000
 n_termes_i=1000
 
 for(d in dimension){
@@ -14,11 +14,11 @@ for(d in dimension){
 }
 
 tau_2_sur_2=tau_2_sur_2/2
-borne_diag=0.33333333/sqrt(dimension)
+borne_diag=0.331333333/sqrt(dimension)
 
 t(rbind(dimension, borne_diag,tau_2_sur_2, res))
 
 # borne_tau_2(30, n_termes_i, n_termes_j)
 
-tab=borne_tau_2(20, 1000, 1000)
-tab=as.data.frame(tab)
+# tab=borne_tau_2(20, 1000, 1000)
+# tab=as.data.frame(tab)

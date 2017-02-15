@@ -7,7 +7,6 @@
 //
 
 #include "fonctions.hpp"
-
 using namespace std;
 
 //renvoie un tableau de taille Nterme +1
@@ -30,41 +29,84 @@ double borneInfS(int i, int d){
     return ceil(2*(d-1)*pow(i, (d-2)/(double)(d-1)));
 }
 
-//rnevoie i=un tableau de taille Niterme+1 par Njterme +1
+//renvoie i=un tableau de taille Niterme+1 par Njterme +1
 vector< vector<double> > tabTau2(int Niterme, int Njterme, int d ){
 
     vector< vector<double> > tab(Niterme+1, vector<double>(Njterme+1));
-    tab[Niterme] = tabTau1(Niterme, d);
+    tab[Niterme] = tabTau1(Njterme, d);
     double A=0.787064;
     double borne_fine=sqrt(3 *M_PI)/sqrt(Niterme)+3.0/(Niterme*A)*exp(-Niterme*A*A/3);
     tab[Niterme][0]=borne_fine;
 
     //rafinement de l'initialisation
-    for(int j = 1; j != Njterme ; j++){
-	tab[Niterme][j]=std::min(borne_fine, tab[Niterme][j]);
+	for(int j = 1; j != Njterme ; j++){
+		tab[Niterme][j]=min(borne_fine, tab[Niterme][j]);
 	}
 
-    for(int i = Niterme - 1; i != 0 ; i--){
-	tab[i][Njterme]=1.0/Njterme;
-
-	for(int j = Njterme-1; j!=-1; j--){
-		double s_i = borneInfS(i, d);
-		double s_j = borneInfS(j, d);
-		double B = max(i-j, 0);
-		tab[i][j]=(1+s_i * tab[i+1][j] + (s_j + B)*tab[i][j+1])/(s_i+s_j+B+j);
+        for(int i = Niterme - 1; i != 0 ; i--){
+		tab[i][Njterme]=1.0/Njterme;
+		for(int j = Njterme-1; j!=-1; j--){
+			double s_i = borneInfS(i, d);
+			double s_j = borneInfS(j, d);
+			double B = max(i-j, 0);
+			tab[i][j]=(1+s_i * tab[i+1][j] + (s_j + B)*tab[i][j+1])/(s_i+s_j+B+j);
+		}
 	}
-    }
-    
-    return tab;
+        return tab;
 }
+
+vector< vector<double> > tabTau2(int Niterme, int Njterme, int NiNeeded, int d ){
+
+        vector<double> tab_int(tabTau1(Njterme, d));
+        double A=0.787064;
+        double borne_fine=sqrt(3 *M_PI)/sqrt(Niterme)+3.0/(Niterme*A)*exp(-Niterme*A*A/3);
+        tab_int[0]=borne_fine;
+
+        //rafinement de l'initialisation
+	for(int j = 1; j != Njterme ; j++){
+		tab_int[j]=min(borne_fine, tab_int[j]);
+	}
+
+        for(int i = Niterme - 1; i != NiNeeded-1 ; i--){
+		tab_int[Njterme]=1.0/Njterme;
+		for(int j = Njterme-1; j!=-1; j--){
+			double s_i = borneInfS(i, d);
+			double s_j = borneInfS(j, d);
+			double B = max(i-j, 0);
+			tab_int[j]=(1+s_i * tab_int[j] + (s_j + B)*tab_int[j+1])/(s_i+s_j+B+j);
+		}
+	}
+
+	vector< vector<double> > tabNeeded(NiNeeded+1, vector<double>(Njterme+1));
+	tabNeeded[NiNeeded]=tab_int;
+
+        for(int i = NiNeeded - 1; i != 0 ; i--){
+		tabNeeded[i][Njterme]=1.0/Njterme;
+		for(int j = Njterme-1; j!=-1; j--){
+			double s_i = borneInfS(i, d);
+			double s_j = borneInfS(j, d);
+			double B = max(i-j, 0);
+			tabNeeded[i][j]=(1+s_i * tabNeeded[i+1][j] + (s_j + B)*tabNeeded[i][j+1])/(s_i+s_j+B+j);
+		}
+	}
+
+        return tabNeeded;
+}
+
 
 double Tau2(int Niterme, int Njterme, int d ){
 	vector< vector<double> > tab(tabTau2(Niterme, Njterme, d ));
 	return tab[1][0];
 }
 
+double Tau2(int Niterme, int Njterme, int NiNeeded, int d ){
+	vector< vector<double> > tab(tabTau2(Niterme, Njterme, NiNeeded,  d ));
+	return tab[1][0];
+}
+
+//optimisatioin intégrée à recopie Tau2
 vector< vector<double> > recopieTau2(int NiTau2, int NjTau2, int Njterme, int Nkterme, int d){
-	vector< vector<double> > tabGrand(tabTau2(NiTau2, NjTau2, d ));
+	vector< vector<double> > tabGrand(tabTau2(NiTau2, NjTau2, Njterme, d));
 
 	vector< vector<double> >  tabPetit(Njterme+1, vector<double>(Nkterme+1));
 	for( int j = 1; j!= Njterme+1; j++){
@@ -120,29 +162,36 @@ double Tau3(int Niterme, int Njterme, int Nkterme, int d ){
 }
 
 //renvoie un tableau de taille Niterme + 1 * Njterme + 1 * Nkterme +1 * Nlterme + 1 
-vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d ){
+vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int NiNeeded, int d ){
 	//vector< vector<double> > tabOpt(tabTau2(NiTau2, NjTau2, d));
 	vector< vector<double> > tabOpt(recopieTau2(NiTau2, NjTau2, Njterme, Nkterme, d));
 
 	double A=1.00738;
 	double borne_fine=pow(12, 1.0/3)*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/12)/(Niterme *A*A/12);
-
-	vector < vector< vector<double> > > tab(Niterme+1, vector< vector<double> >(Njterme+1, vector<double>(Nkterme+1)));
-
-	for( int j = 1; j!= Njterme+1; j++){
-		for(int k = 0; k!=Nkterme+1; k++){
-			tab[Niterme][j][k]=min(borne_fine, tabOpt[j][k]);
-		}
-	}
 	
-	tab[Niterme][0][0]=borne_fine;
-	/*for(int j = 1; j != Njterme+1 ; j++){
-		for (int k=0; k!=Nkterme+1; k++){
-			tab[Niterme][j][k] = min(borne_fine, tab[Niterme][j][k]);
+	tabOpt[0][0]=borne_fine;
+	for(int i = Niterme - 1; i != NiNeeded-1 ; i--){
+		
+		if(i%100==0){
+			cout << "i= " << i  << endl;
 		}
-	}*/
-	
-	for(int i = Niterme - 1; i != 0 ; i--){
+
+		for(int j = Njterme-1; j!=-1; j--){
+			for(int k =Nkterme-1; k!=-1; k--){ 
+				double s_i = borneInfS(i, d);
+				double s_j = borneInfS(j, d);
+				double s_k = borneInfS(k, d);
+				double B_0_1 = max(i-j, 0);
+				double B_1_2 = max(j-k, 0);
+				tabOpt[j][k]=(1 + s_i * tabOpt[j][k] + (s_j+B_0_1) * tabOpt[j+1][k] + (s_k+B_1_2) * tabOpt[j][k+1])/(s_i+s_j+s_k+B_0_1+B_1_2+k);
+			}
+		}
+    	}
+
+	vector < vector< vector<double> > > tab(NiNeeded+1, vector< vector<double> >(Njterme+1, vector<double>(Nkterme+1)));
+	tab[NiNeeded]=tabOpt;
+
+	for(int i = NiNeeded - 1; i !=0 ; i--){
 		
 		if(i%100==0){
 			cout << "i= " << i  << endl;
@@ -171,12 +220,12 @@ vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterm
 }
 
 double Tau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d ){
-	vector < vector< vector<double> > > tab(tabTau3Opt(NiTau2, NjTau2, Niterme, Njterme, Nkterme, d ));
+	vector < vector< vector<double> > > tab(tabTau3Opt(NiTau2, NjTau2, Niterme, Njterme, Nkterme,1,  d ));
 	return tab[1][0][0];
 }
 
 vector< vector< vector<double> > > recopieTau3(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int Njterme, int Nkterme, int Nlterme, int d ){
-	vector < vector< vector<double> > > tabGrand(tabTau3Opt(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, d));
+	vector < vector< vector<double> > > tabGrand(tabTau3Opt(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, Njterme, d));
 	vector < vector< vector<double> > > tabPetit(Njterme+1, vector < vector<double> > (Nkterme+1, vector<double>(Nlterme+1)));
 	for(int j=Njterme; j!=0; j--){
 		for(int k = Nkterme; k!=-1; k--){
@@ -282,6 +331,7 @@ vector< vector< vector< vector<double> > > > recopieTau4(int NiTau2, int NjTau2,
 	return tabPetit;
 }
 
+/*
 vector< vector< vector< vector< vector<double> > > > > tabTau5(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Niterme, int Njterme, int Nkterme, int Nlterme, int Nmterme, int d ){
 	
 	cout << "debut"  << endl;
@@ -376,7 +426,7 @@ double Tau5(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTa
 	vector <vector< vector < vector< vector<double> > > > > tab(tabTau5(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, Niterme, Njterme, Nkterme, Nlterme, Nmterme, d));
 	return tab[1][0][0][0][0];
 }
-
+*/
 
 
 

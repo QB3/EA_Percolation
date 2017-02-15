@@ -5,7 +5,7 @@ using namespace std;
 using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
-	int d = 25;
+	int d = 20;
 	int ni=10000;
 	int nj=1000;
 	/*int nk=100;

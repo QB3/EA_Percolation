@@ -11,8 +11,8 @@
 using namespace std;
 
 //renvoie un tableau de taille Nterme +1
-std::vector<double> tabTau1(int Nterme, int d){
-    std::vector<double> tab(Nterme+1);
+vector<double> tabTau1(int Nterme, int d){
+    vector<double> tab(Nterme+1);
     tab[Nterme] = 1.0/ (Nterme+1);
     for(int i = Nterme - 1; i != 0 ; i--){
         double b = borneInfS(i, d);
@@ -22,7 +22,7 @@ std::vector<double> tabTau1(int Nterme, int d){
 }
 
 double Tau1(int Nterme, int d){
-    std::vector<double> tab = tabTau1(Nterme, d);
+    vector<double> tab = tabTau1(Nterme, d);
     return tab[1];
 }
 
@@ -61,6 +61,18 @@ vector< vector<double> > tabTau2(int Niterme, int Njterme, int d ){
 double Tau2(int Niterme, int Njterme, int d ){
 	vector< vector<double> > tab(tabTau2(Niterme, Njterme, d ));
 	return tab[1][0];
+}
+
+vector< vector<double> > recopieTau2(int NiTau2, int NjTau2, int Njterme, int Nkterme, int d){
+	vector< vector<double> > tabGrand(tabTau2(NiTau2, NjTau2, d ));
+
+	vector< vector<double> >  tabPetit(Njterme+1, vector<double>(Nkterme+1));
+	for( int j = 1; j!= Njterme+1; j++){
+		for(int k = 0; k!=Nkterme+1; k++){
+			tabPetit[j][k]=tabGrand[j][k];
+		}
+	}
+	return tabPetit;
 }
 
 //renvoie un tableau de taille Niterme +1 * Njterme +1 * Nkterme + 1
@@ -109,23 +121,26 @@ double Tau3(int Niterme, int Njterme, int Nkterme, int d ){
 
 //renvoie un tableau de taille Niterme + 1 * Njterme + 1 * Nkterme +1 * Nlterme + 1 
 vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d ){
-	vector< vector<double> > tabOpt(tabTau2(NiTau2, NjTau2, d));
-	vector < vector< vector<double> > > tab(Niterme+1, vector< vector<double> >(Njterme+1, vector<double>(Nkterme+1)));
-	for( int j = 1; j!= Njterme+1; j++){
-		for(int k = 0; k!=Nkterme+1; k++){
-			tab[Niterme][j][k]=tabOpt[j][k];
-		}
-	}
+	//vector< vector<double> > tabOpt(tabTau2(NiTau2, NjTau2, d));
+	vector< vector<double> > tabOpt(recopieTau2(NiTau2, NjTau2, Njterme, Nkterme, d));
 
 	double A=1.00738;
 	double borne_fine=pow(12, 1.0/3)*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/12)/(Niterme *A*A/12);
 
+	vector < vector< vector<double> > > tab(Niterme+1, vector< vector<double> >(Njterme+1, vector<double>(Nkterme+1)));
+
+	for( int j = 1; j!= Njterme+1; j++){
+		for(int k = 0; k!=Nkterme+1; k++){
+			tab[Niterme][j][k]=min(borne_fine, tabOpt[j][k]);
+		}
+	}
+	
 	tab[Niterme][0][0]=borne_fine;
-	for(int j = 1; j != Njterme+1 ; j++){
+	/*for(int j = 1; j != Njterme+1 ; j++){
 		for (int k=0; k!=Nkterme+1; k++){
 			tab[Niterme][j][k] = min(borne_fine, tab[Niterme][j][k]);
 		}
-	}
+	}*/
 	
 	for(int i = Niterme - 1; i != 0 ; i--){
 		
@@ -160,11 +175,25 @@ double Tau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, in
 	return tab[1][0][0];
 }
 
+vector< vector< vector<double> > > recopieTau3(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int Njterme, int Nkterme, int Nlterme, int d ){
+	vector < vector< vector<double> > > tabGrand(tabTau3Opt(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, d));
+	vector < vector< vector<double> > > tabPetit(Njterme+1, vector < vector<double> > (Nkterme+1, vector<double>(Nlterme+1)));
+	for(int j=Njterme; j!=0; j--){
+		for(int k = Nkterme; k!=-1; k--){
+			for(int l =Nlterme; l!=-1; l--){
+				tabPetit[j][k][l]=tabGrand[j][k][l];
+			}
+		}
+	}
+	return tabPetit;
+}
+
 //tabtau4 est déjà optimisé
 vector< vector< vector< vector<double> > > > tabTau4(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int Niterme, int Njterme, int Nkterme, int Nlterme, int d ){
 
 	cout << "debut"  << endl;
-	vector < vector< vector<double> > > tabOpt(tabTau3Opt(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, d));
+	//vector < vector< vector<double> > > tabOpt(tabTau3Opt(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, d));
+	vector < vector< vector<double> > > tabOpt(recopieTau3(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, Njterme, Nkterme, Nlterme, d));
 	cout << "fin du calcul de tabTau3"  << endl;
 
 	vector< vector < vector< vector<double> > > > tab(Niterme+1, vector< vector< vector<double> > >(Njterme+1, vector < vector<double> > (Nkterme+1, vector<double>(Nlterme+1))));
@@ -237,10 +266,27 @@ double Tau4(int NiTau2, int NjTau2,int NiTau3, int NjTau3, int NkTau3, int Niter
 	return tab[1][0][0][0];
 }
 
+vector< vector< vector< vector<double> > > > recopieTau4(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Njterme, int Nkterme, int Nlterme, int Nmterme, int d){
+	vector< vector < vector< vector<double> > > > tabGrand(tabTau4(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, d ));
+	vector< vector < vector< vector<double> > > >  tabPetit(Njterme+1, vector< vector < vector<double> > >(Nkterme+1, vector< vector<double> >(Nlterme+1, vector<double>(Nmterme +1))));
+	for(int j=Njterme; j!=0; j--){
+		cout << "j = " << j << endl;
+		for(int k = Nkterme; k!=-1; k--){
+			for(int l =Nlterme; l!=-1; l--){
+				for (int m=Nmterme; m!=-1; m--){
+					tabPetit[j][k][l][m]=tabGrand[j][k][l][m];
+				}
+			}
+		}
+	}
+	return tabPetit;
+}
+
 vector< vector< vector< vector< vector<double> > > > > tabTau5(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Niterme, int Njterme, int Nkterme, int Nlterme, int Nmterme, int d ){
 	
 	cout << "debut"  << endl;
-	vector< vector < vector< vector<double> > > > tabOpt(tabTau4(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, d ));
+	//vector< vector < vector< vector<double> > > > tabOpt(tabTau4(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, d ));
+	vector< vector < vector< vector<double> > > > tabOpt(recopieTau4(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, Njterme, Nkterme, Nlterme, Nmterme, d ));
 	cout << "fin du calcul de tabTau4"  << endl;
 
 	vector <vector< vector < vector< vector<double> > > > > tab(Niterme+1, vector< vector< vector< vector<double> > >>(Njterme+1, vector< vector < vector<double> > >(Nkterme+1, vector< vector<double> >(Nlterme+1, vector<double>(Nmterme +1)))));

@@ -98,17 +98,6 @@ Borne_T_l_0_0=function(n, M, alpha){
 
 #attention n_terme i > 50 impossibles
 borne_tau_3=function(d, n_termes_i, n_termes_j, n_termes_k){
-
-   # d=10
-   # n_termes_i=1000
-   # n_termes_j=1000
-   # n_termes_k=1000
-
-  # f=function(x){
-  #   res=exp(-(n_termes_i+1)*x)*(x+1+x^2/2)^(n_termes_i+1)
-  #   return(res)
-  # }
-  # borne_T_l_0_0=integrate(f, 0, Inf, stop.on.error=FALSE)$value
   
   borne_T_l_0_0=Borne_T_l_0_0(n_termes_i+1, 10000, 3)
   #on rempli la plan loin d'équation i=n_termes_i
@@ -140,4 +129,28 @@ borne_tau_3=function(d, n_termes_i, n_termes_j, n_termes_k){
   return(tab_pres[1,1])
 }
 
+#renvoie un tableau de taille n_termes_i * (n_termes_j+1)
+tab_borne_delta_tau_12=function(d, n_termes_i, n_termes_j){
+  borne_fine_T_k_0=2/sqrt(n_termes_i+1) #-1/i
+  
+  tab_bas=tab_borne_tau_1(n_termes_j-1, d)
+  tab_bas=pmin(tab_bas, borne_fine_T_k_0)
+  #tab_bas=c(tab_bas[1]+1/(n_termes_i+1), tab_bas)
+  tab_bas=c(borne_fine_T_k_0, tab_bas)
+  tab_haut=tab_bas
+  res=matrix(0, n_termes_i, n_termes_j+1)
+  for (i in n_termes_i:1){
+    tab_haut[n_termes_j+1]=1/n_termes_j
+    for( j in n_termes_j:2){
+      s_i=borne_inf_S(i, d)
+      s_j=borne_inf_S(j-1, d)
+      B=max(i-j+1, 0)
+      tab_haut[j]=(1+tab_bas[j]*s_i+(s_j+B)*tab_haut[j+1])/(s_i+s_j+B+j-1)
+    }
+    tab_haut[1]=(tab_bas[1]*s_i+i*tab_haut[2])/(s_i+i)
+    res[i,]=tab_haut
+    tab_bas=tab_haut
+  }
+  return(res)
+}
 

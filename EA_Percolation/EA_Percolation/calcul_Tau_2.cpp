@@ -5,7 +5,7 @@ using namespace std;
 using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
-	int d = 40;
+	//int d = 40;
 	int ni=10000;
 	int nj=1000;
 	int niNeeded=100;
@@ -16,17 +16,21 @@ int main(int argc, const char * argv[]) {
 	int niTau3 = 1000;
 	int njTau3=1000;
 	int nkTau3=100;*/
+	//int tabd[8] = {2, 3, 4, 5, 22, 25, 30, 35};
+	
+	int tabd[1]={20};
+        high_resolution_clock::time_point t1 = high_resolution_clock::now();
+        for( int i =0; i<1; i++){
+		int d=tabd[i];
+		double res = Tau2(ni, nj, niNeeded, d);
+		//double res = Tau2(ni, nj, d);
+		cout << "d = " << d  << " ni = " << ni << " nj = " << nj << endl;
+		cout << "Tau_2 * d * 2 /log(2d) = " << res * d / log(2*d)  << endl;
+		cout<< "log(100) =" << log(100) << endl;
+		cout << "Tau_2 / 2 = " << res/2  << endl;
 
-    high_resolution_clock::time_point t1 = high_resolution_clock::now();
-    
-	double res = Tau2(ni, nj, niNeeded, d);
-	//double res = Tau2(ni, nj, d);
-	cout << "d = " << d  << " ni = " << ni << " nj = " << nj << endl;
-	cout << "Tau_2 * d * 2 /log(2d) = " << res * d / log(2*d)  << endl;
-	cout<< "log(100) =" << log(100) << endl;
-	cout << "Tau_2 / 2 = " << res/2  << endl;
-
-	cout << "borne diag = " << 0.3313/sqrt(d)  << endl;
+		cout << "borne diag = " << 0.3313/sqrt(d)  << endl;
+	}
 
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     

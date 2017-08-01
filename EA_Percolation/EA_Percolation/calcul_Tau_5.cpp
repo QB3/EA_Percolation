@@ -31,7 +31,7 @@ int main(int argc, const char * argv[]) {
 	int njTau4=100;//1000
 	int nkTau4=10;//100
 	int nlTau4=1;
-	int tabd[8] = {22};
+	int tabd[8] = {2};
         high_resolution_clock::time_point t1 = high_resolution_clock::now();
     
 	for(int i =0; i<1; i++){

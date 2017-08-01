@@ -7,16 +7,16 @@ using namespace std::chrono;
 int main(int argc, const char * argv[]) {
 	//int d = 30; //des choix atucieux de ni, nj, .. sont mis en commentaires
 	int ni=1000; //10000
-	int nj=100; //1000
+	int nj=1000; //1000
 	int nk=100;//100 
 	//int nl=10;
 	int niTau2=1000;//10000
-	int njTau2=100;//1000
+	int njTau2=1000;//1000
 	/*int niTau3 = 1000;
 	int njTau3=1000;
 	int nkTau3=100;*/
 	
-	int tabd[1] = {18};
+	int tabd[1] = {2};
 
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	for(int i=0; i<1; i++){

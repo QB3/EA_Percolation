@@ -19,7 +19,7 @@ int main(int argc, const char * argv[]) {
 	//int d = 23;
 	int ni=1000;
 	int nj=100;//10-100
-	int nk=100;//10-100
+	int nk=10;//10-100
 	int nl=10;//10-100
 	int nm=1;
 	int niTau2=10000;//10000
@@ -31,7 +31,7 @@ int main(int argc, const char * argv[]) {
 	int njTau4=100;//1000
 	int nkTau4=10;//100
 	int nlTau4=1;
-	int tabd[8] = {16};
+	int tabd[8] = {2};
         high_resolution_clock::time_point t1 = high_resolution_clock::now();
     
 	for(int i =0; i<1; i++){
@@ -42,15 +42,15 @@ int main(int argc, const char * argv[]) {
 		cout << "Delta_Tau_45 = " << res  << endl;
 		cout << "borne diag = " << 0.3313/sqrt(d)  << endl;
 
-		fstream f("tau5.txt",ios_base::in | ios_base::out | ios_base::trunc);
+		/*fstream f("tau5.txt",ios_base::in | ios_base::out | ios_base::trunc);
 		if (f.is_open()){
 			// Écrit les données :
-			f<< "d = " << d  << " ni = " << ni << " nj = " << nj << " nk = "<< nk << " nl = " << nl << " nm = "<< nm << endl << "Tau_5 / 5 = " << res/5  << endl<< "borne diag = " << 0.3313/sqrt(d)  << endl;
+			f<< "d = " << d  << " ni = " << ni << " nj = " << nj << " nk = "<< nk << " nl = " << nl << " nm = "<< nm << endl << "Tau_5 / 5 = " << res/5  << endl<< "borne diag = " << 0.33133313/sqrt(d)  << endl;
 			// Replace le pointeur de fichier au début :
 			f.seekg(0);
 			// Ferme le fichier :
 			f.close();
-	    	}
+	    	}*/
 
 	}
         high_resolution_clock::time_point t2 = high_resolution_clock::now();

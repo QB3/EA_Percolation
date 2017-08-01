@@ -1,14 +1,16 @@
 #include <chrono>
 #include "fonctions.hpp"
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
 	//int d = 30; //des choix atucieux de ni, nj, .. sont mis en commentaires
-	int ni=100; //10000
-	int nj=20; //1000
-	int nk=30;//100 
+	int ni=1000; //10000
+	int nj=100; //1000
+	int nk=10;//100 
 	//int nl=10;
 	int niTau2=1000;//10000
 	int njTau2=100;//1000
@@ -24,15 +26,15 @@ int main(int argc, const char * argv[]) {
 	        
 		//double res1 = Tau3Opt(niTau2, njTau2, ni, nj, nk, 1, d);
 		//double res2 = Tau3Opt(niTau2, njTau2, ni, nj, nk, 5, d);
-		//double res3 = Tau3Opt(niTau2, njTau2, ni, nj, nk, ni, d);
-		//cout << "d = " << d  << " ni = " << ni << " nj = "<< nj <<" nk = "<< nk   << endl;
+		double res1 = Tau3Opt(niTau2, njTau2, ni, nj, nk, d);
+		cout << "d = " << d  << " ni = " << ni << " nj = "<< nj <<" nk = "<< nk   << endl;
 		//cout << "Tau_3 * d * 2 /log(2d) /3 = " << res * 2 * d /log(2*d) /3  << endl;
 		cout << "Tau_3 / 3 = " << res1/3  << endl;
 		cout << "borne diag = " << 0.3313/sqrt(d)  << endl;
 
-		cout << "Tau3 = " << res1  << endl;
+		//cout << "Tau3 = " << res1  << endl;
 		//cout << "Tau3 = " << res2  << endl;
-		cout << "Tau3 = " << res3  << endl;
+		//cout << "Tau3 = " << res3  << endl;
 
 
 	}

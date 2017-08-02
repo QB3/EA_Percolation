@@ -17,7 +17,7 @@ using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
 	//int d = 25;
-	int precision=4;
+	int precision=8;
 	int ni=1000;//1000 à tester : 10000
 	int nj=100;//100 à tester : 1000
 	int nk=10;//100 à tester : 100
@@ -28,7 +28,7 @@ int main(int argc, const char * argv[]) {
 	int njTau3=100;//100
 	int nkTau3=100;//10
 	//int tabd[10] = {2, 3, 4, 5, 10, 12, 15, 16, 17, 21};
-	int tabd[1] = {16};
+	int tabd[1] = {2};
 
 
 	int tailleTab=extent<decltype(tabd)>::value;

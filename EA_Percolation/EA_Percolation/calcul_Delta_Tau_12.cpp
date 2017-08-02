@@ -6,7 +6,7 @@ using namespace std::chrono;
 
 int main(int argc, const char * argv[]) {
 	//int d = 40;
-	int ni=1000;
+	int ni=10000;
 	int nj=1000;
 	int niNeeded=1;
 	/*int nk=100;
@@ -18,7 +18,7 @@ int main(int argc, const char * argv[]) {
 	int nkTau3=100;*/
 	//int tabd[8] = {2, 3, 4, 5, 22, 25, 30, 35};
 	
-	int tabd[1]={2};
+	int tabd[1]={21};
         high_resolution_clock::time_point t1 = high_resolution_clock::now();
         for( int i =0; i<1; i++){
 		int d=tabd[i];

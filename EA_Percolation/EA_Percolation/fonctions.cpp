@@ -10,20 +10,28 @@
 using namespace std;
 #include <math.h>  
 
-//renvoie un tableau de taille Nterme +1
-vector<double> tabTau1(int Nterme, int d){
-    vector<double> tab(Nterme+1);
-    tab[Nterme] = 1.0/ (Nterme+1);
-    for(int i = Nterme - 1; i != 0 ; i--){
-        double b = borneInfS(i, d);
-        tab[i] = (1.0 + tab[i+1]*b)/(b+i);
+//this function returns an array of size Nterme +1
+//the i th element of the array is an bound on the quantity T_i
+//T_0 is left empty (ie to 0)
+//a rought bound on T_{Nterme} (Nterme \in \mathbb{N}) is computed
+//then a tighter bound is obtained for T_{Nterme-1}, T_{Nterme-2}, ... and T_1 = \mathbb{E}(\tau_1)
+vector<double> tabTau1(int Nterme, int dimension){
+    vector<double> tab(Nterme+1); //the array of size Nterme +1 is created
+    tab[Nterme] = 1.0/Nterme; // the array is initialized, ie T_{Nterme} is bound roughly by 1.0/Nterme
+    for(int i = Nterme - 1; i != 0 ; i--){//the bound on T_i (stored in tab[i]) is computed backward with the formula presented in the article
+        double s_i = borneInfS(i, dimension);//s_i is a bound on |S|
+        tab[i] = (1.0 + tab[i+1]*s_i)/(s_i+i);//T_i is computed backward with the bound on T_{i+1}
     }
-    return tab;
+    return tab;//we return the whole tab
 }
+
+//this function encapsulates the previous one and returns the bound on T_1 (ie returns tab[1]) 
 double Tau1(int Nterme, int d){
-    vector<double> tab = tabTau1(Nterme, d);
-    return tab[1];
+    vector<double> tab = tabTau1(Nterme, d);//call to the previous funciton
+    return tab[1];//returns a bound on T_1
 }
+
+//this function computes the bound on |S| with the formula given by Dhar in his article (equation 7 in his paper)
 double borneInfS(int i, int d){
 	if(i==0){
 		return 0;
@@ -33,31 +41,42 @@ double borneInfS(int i, int d){
 	}
     return ceil(2*(d-1)*pow(i, (d-2)/(double)(d-1)));
 }
-//renvoie i=un tableau de taille Niterme+1 par Njterme +1
-vector< vector<double> > tabTau2(int Niterme, int Njterme, int d ){
 
-    vector< vector<double> > tab(Niterme+1, vector<double>(Njterme+1));
-    tab[Niterme] = tabTau1(Njterme, d);
+//returns an array of size Niterme+1 by Njterme +1
+//the element [i, j] of the array is a bound on T_{i, j}
+//T_{0,0} is left empty, ie left to 0
+//The array T_{Niterme, j} is bound roughly by  T_{Niterme} 
+//The array T_{i, Njterme} is bound roughly by  T_{Niterme}
+//Then the Niterme+1 by Njterme +1 is filled with the recursiv inequality
+vector< vector<double> > tabTau2(int Niterme, int Njterme, int d ){
+    vector< vector<double> > tab(Niterme+1, vector<double>(Njterme+1));//creation of the Niterme+1 by Njterme +1 array
+    tab[Niterme] = tabTau1(Njterme, d); //one border is bound
     double borne_fine=borne_Tau_i_0_0(Niterme);
     tab[Niterme][0]=borne_fine;
 
-    //rafinement de l'initialisation
+    //initialization more precise
 	for(int j = 1; j != Njterme ; j++){
 		tab[Niterme][j]=min(borne_fine, tab[Niterme][j]);
 	}
     for(int i = Niterme - 1; i != 0 ; i--){
-		tab[i][Njterme]=1.0/Njterme;
+		tab[i][Njterme]=1.0/Njterme;//the second border is bound roughly
 		for(int j = Njterme-1; j!=-1; j--){
-			double s_i = borneInfS(i, d);
-			double s_j = borneInfS(j, d);
-			double B = max(i-j, 0);
-			tab[i][j]=(1+s_i * tab[i+1][j] + (s_j + B)*tab[i][j+1])/(s_i+s_j+B+j);
+			double s_i = borneInfS(i, d);//intermediate quantity
+			double s_j = borneInfS(j, d);//intermediate quantity
+			double B = max(i-j, 0);//intermediate quantity
+			tab[i][j]=(1+s_i * tab[i+1][j] + (s_j + B)*tab[i][j+1])/(s_i+s_j+B+j);//we apply the backward inequality
 		}
 	}
         return tab;
 }
+
+//this function is the same as tabTau2 BUT:
+//it computes the array starting from T_{Niterme} but does not store useless information
+//example: while computing T_{1, 0, 0} at the next step you will have to bound the limits T_{i,j} in order to apply the backward inequatlity
+//We compute T_{i, j} using an Niterme + 1* Njterme + 1  array BUT we only store an Njterme + 1 * NiNeeded +1 array
 vector< vector<double> > tabTau2(int Niterme, int Njterme, int NiNeeded, int d ){
 
+	//first part of the function, we compute backward the T_{i,j} without storing the results
     vector<double> tab_int(tabTau1(Njterme, d));
     double A=0.787064;
     double borne_fine=sqrt(3 *M_PI)/sqrt(Niterme)+3.0/(Niterme*A)*exp(-Niterme*A*A/3);
@@ -77,9 +96,9 @@ vector< vector<double> > tabTau2(int Niterme, int Njterme, int NiNeeded, int d )
 		}
 	}
 
+	//second part of the function, we compute backward the T_{i,j} AND we store the results
 	vector< vector<double> > tabNeeded(NiNeeded+1, vector<double>(Njterme+1));
 	tabNeeded[NiNeeded]=tab_int;
-
         for(int i = NiNeeded - 1; i != 0 ; i--){
 		tabNeeded[i][Njterme]=1.0/Njterme;
 		for(int j = Njterme-1; j!=-1; j--){
@@ -90,22 +109,15 @@ vector< vector<double> > tabTau2(int Niterme, int Njterme, int NiNeeded, int d )
 			if(i==0){
 				M_i=0;
 			}
-			//double M_j=2*j+2;
 			double Q_s=(1+M_i * tabNeeded[i+1][j] + (s_j + B)*tabNeeded[i][j+1])/(M_i+s_j+B+j);
 			double Q_M= (1+s_i * tabNeeded[i+1][j] + (s_j + B)*tabNeeded[i][j+1])/(s_i+s_j+B+j);
 			tabNeeded[i][j]=max(Q_s, Q_M);
-			
-			/*double diff = -(Q_s-Q_M);
-			if(diff > 0.0000001){ 
-				cout << "i : " << i << " j : " << j << endl;
-				cout << "s_i : "<<Q_s<< "M_i : "<< Q_M << endl;
-				cout<< "diif : " << diff <<endl;
-			}	*/	
 		}
 	}
-
         return tabNeeded;
 }
+
+//this two functions encapsulates the previous one, without et with the optimization
 double Tau2(int Niterme, int Njterme, int d ){
 	vector< vector<double> > tab(tabTau2(Niterme, Njterme,2, d ));
 	return tab[1][0];
@@ -114,7 +126,8 @@ double Tau2(int Niterme, int Njterme, int NiNeeded, int d ){
 	vector< vector<double> > tab(tabTau2(Niterme, Njterme, NiNeeded,  d ));
 	return tab[1][0];
 }
-//optimisatioin intégrée à recopie Tau2
+^
+//auxiliar function whixh cpy the array
 vector< vector<double> > recopieTau2(int NiTau2, int NjTau2, int Njterme, int Nkterme, int d){
 	vector< vector<double> > tabGrand(tabTau2(NiTau2, NjTau2, Njterme, d));
 
@@ -126,32 +139,32 @@ vector< vector<double> > recopieTau2(int NiTau2, int NjTau2, int Njterme, int Nk
 	}
 	return tabPetit;
 }
-//renvoie un tableau de taille Niterme +1 * Njterme +1 * Nkterme + 1
-vector< vector< vector<double> > > tabTau3(int Niterme, int Njterme, int Nkterme, int d ){
-	vector < vector< vector<double> > > tab(Niterme+1, vector< vector<double> >(Njterme+1, vector<double>(Nkterme+1)));
+
+//returns a 3-dimensional array of size Niterme +1 * Njterme +1 * Nkterme + 1
+//element [i,j,k] is a bound on T_{i, j, k}
+//as the previous functions, the border are bounded roughly in order to be able to apply the backward inequality
+vector< vector< vector<double> > > tabTau3(int Niterme, int Njterme, int Nkterme,
+ int d ){
+	vector < vector< vector<double> > > tab(Niterme+1, vector< vector<double> >(Njterme+1, vector<double>(Nkterme+1)));// creates a 2-DIMENSIONAL ARRAY
 	tab[Niterme] = tabTau2(Njterme,Nkterme, d);
 	//à modifier
 	double A=0.39255;
 	double borne_fine=2*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/8)/(Niterme* A*A/8);
 	//double borne_fine=pow(12, 1.0/3)*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/12)/(Niterme *A*A/12);
-
 	tab[Niterme][0][0]=borne_fine;
 	for(int j = 1; j != Njterme ; j++){
 		for (int k=0; k!=Nkterme; k++){
 			tab[Niterme][j][k] = min(borne_fine, tab[Niterme][j][k]);
 		}
 	}
-	
 	for(int i = Niterme - 1; i != 0 ; i--){
 
 		for(int k =0; k!=Nkterme+1; k++){
 			tab[i][Njterme][k]=tab[Niterme][Njterme][k];
 		}
-
 		for(int j =1;j!=Njterme+1; j++){
 			tab[i][j][Nkterme]=tab[Niterme][j][Nkterme];
 		}
-
 		for(int j = Njterme-1; j!=-1; j--){
 			for(int k =Nkterme-1; k!=-1; k--){ 
 				double s_i = borneInfS(i, d);
@@ -169,21 +182,18 @@ double Tau3(int Niterme, int Njterme, int Nkterme, int d ){
 	vector < vector< vector<double> > > tab(tabTau3(Niterme, Njterme, Nkterme, d ));
 	return tab[1][0][0];
 }
-//renvoie un tableau de taille Niterme + 1 * Njterme + 1 * Nkterme +1 * Nlterme + 1 
-//à enventuellement rajouter, prendre le min avec la borne fine à chaque étape 
+
+//returns a 3-dimensional array of size Niterme +1 * Njterme +1 * Nkterme + 1
+//element [i,j,k] is a bound on T_{i, j, k}
+//as the previous functions, the border are bounded roughly in order to be able to apply the backward inequality
 vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int NiNeeded, int d ){
-	//cout << "NOUVEAU CALCUL" << endl;
-	//vector< vector<double> > tabOpt(tabTau2(NiTau2, NjTau2, d));
-	vector< vector<double> > tabOpt(recopieTau2(NiTau2, NjTau2, Njterme, Nkterme, d));
+	vector< vector<double> > tabOpt(recopieTau2(NiTau2, NjTau2, Njterme, Nkterme, d));//cretas the array
 
 	double A=0.39255;
-	double borne_fine=2*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/8)/(Niterme* A*A/8);
-	//double A=1.00738;
-	//double borne_fine=pow(12, 1.0/3)*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/12)/(Niterme *A*A/12);
+	double borne_fine=2*0.89298/(pow(Niterme, 1.0/3)) + exp(- Niterme * A*A*A/8)/(Niterme* A*A/8);//computes a tight bound on T_{Niterme, 0, 0}
 	tabOpt[0][0]=borne_fine;
 
-	//cout << "TABLEAU INITIAL" << endl;
-	//print(tabOpt, Njterme,Nkterme);
+	//first step of the function, computes the bounds without storing them all
 	for(int i = Niterme - 1; i != NiNeeded-1 ; i--){	
 		if(i%100==0){
 			cout << "i= " << i  << endl;
@@ -195,15 +205,14 @@ vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterm
 			for(int k =Nkterme-1; k!=-1; k--){ 
 				double s_k = borneInfS(k, d);
 				double B_1_2 = max(j-k, 0);
-				tabOpt[j][k] =1 + s_i*tabOpt[j][k] + (s_j+B_0_1)*tabOpt[j+1][k] + (s_k+B_1_2)*tabOpt[j][k+1];
-				tabOpt[j][k] = tabOpt[j][k]/(s_i + s_j + B_0_1 + s_k + B_1_2);
+				tabOpt[j][k] =1 + s_i*tabOpt[j][k] + (s_j+B_0_1)*tabOpt[j+1][k] + (s_k+B_1_2)*tabOpt[j][k+1];//applies the recursion equality
+				tabOpt[j][k] = tabOpt[j][k]/(s_i + s_j + B_0_1 + s_k + B_1_2);//applies the recursion equality
 			}
 		}
    	}
-
-	vector < vector< vector<double> > > tab(NiNeeded+1, vector< vector<double> >(Njterme+1, vector<double>(Nkterme+1)));
+   	//second step of the function, computes the bounds and stores them, into a 3-dimensional array
+	vector < vector< vector<double> > > tab(NiNeeded+1, vector< vector<double> >(Njterme+1, vector<double>(Nkterme+1)));// creates a 3-DIMENSIONAL ARRAY
 	tab[NiNeeded]=tabOpt;
-
 	for(int i = NiNeeded - 1; i !=0 ; i--){
 		if(i%100==0){
 			cout << "i= " << i  << endl;
@@ -222,22 +231,26 @@ vector< vector< vector<double> > > tabTau3Opt(int NiTau2, int NjTau2, int Niterm
 			for(int k =Nkterme-1; k!=-1; k--){ 
 				double s_k = borneInfS(k, d);
 				double B_1_2 = max(j-k, 0);
-				tab[i][j][k] = 1 + s_i * tab[i+1][j][k] + (s_j+B_0_1) * tab[i][j+1][k] + (s_k + B_1_2) * tab[i][j][k+1];
-				tab[i][j][k] = tab[i][j][k]/(s_i + s_j +B_0_1 +s_k +B_1_2);
+				tab[i][j][k] = 1 + s_i * tab[i+1][j][k] + (s_j+B_0_1) * tab[i][j+1][k] + (s_k + B_1_2) * tab[i][j][k+1];//applies the recursion equality
+				tab[i][j][k] = tab[i][j][k]/(s_i + s_j +B_0_1 +s_k +B_1_2);//applies the recursion equality
 			}
 		}
     }
 	return tab;
 }
 
+//encapsulates the  tabTau3Opt function
 double Tau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int d ){
 	vector < vector< vector<double> > > tab(tabTau3Opt(NiTau2, NjTau2, Niterme, Njterme, Nkterme,1,  d ));
 	return tab[1][0][0];
 }
+//encapsulates the  tabTau3Opt function
 double Tau3Opt(int NiTau2, int NjTau2, int Niterme, int Njterme, int Nkterme, int NiNeeded, int d ){
 	vector < vector< vector<double> > > tab(tabTau3Opt(NiTau2, NjTau2, Niterme, Njterme, Nkterme,NiNeeded,  d ));
 	return tab[1][0][0];
 }
+
+//auxiliar function use to copy an array
 vector< vector< vector<double> > > recopieTau3(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int Njterme, int Nkterme, int Nlterme, int d ){
 	vector < vector< vector<double> > > tabGrand(tabTau3Opt(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, Njterme, d));
 	vector < vector< vector<double> > > tabPetit(Njterme+1, vector < vector<double> > (Nkterme+1, vector<double>(Nlterme+1)));
@@ -250,8 +263,12 @@ vector< vector< vector<double> > > recopieTau3(int NiTau2, int NjTau2, int NiTau
 	}
 	return tabPetit;
 }
-vector< vector< vector< vector<double> > > > tabTau4(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int Niterme, int Njterme, int Nkterme, int Nlterme, int NiNeeded, int d ){
 
+
+//returns a 4-dimensional array of size Niterme +1 * Njterme +1 * Nkterme + 1 * Nlterme + 1
+//element [i,j,k,l] is a bound on T_{i, j, k, l}
+//as the previous functions, the border are bounded roughly in order to be able to apply the backward inequality
+vector< vector< vector< vector<double> > > > tabTau4(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int Niterme, int Njterme, int Nkterme, int Nlterme, int NiNeeded, int d ){
 	cout << "debut"  << endl;
 	vector < vector< vector<double> > > tabOpt(recopieTau3(NiTau2, NjTau2, NiTau3,  NjTau3, NkTau3, Njterme, Nkterme, Nlterme, d));
 	cout << "fin du calcul de tabTau3"  << endl;
@@ -339,10 +356,14 @@ vector< vector< vector< vector<double> > > > tabTau4(int NiTau2, int NjTau2, int
     	}
 	return tab;
 }
+
+//encapsulates the previous funciton
 double Tau4(int NiTau2, int NjTau2,int NiTau3, int NjTau3, int NkTau3, int Niterme, int Njterme, int Nkterme, int Nlterme, int d){
 	vector< vector < vector< vector<double> > > > tab(tabTau4(NiTau2, NjTau2, NiTau3,NjTau3, NkTau3, Niterme, Njterme, Nkterme, Nlterme, 1, d ));
 	return tab[1][0][0][0];
 }
+
+//auxiliar function which copies an array
 vector< vector< vector< vector<double> > > > recopieTau4(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Njterme, int Nkterme, int Nlterme, int Nmterme, int d){
 	vector< vector < vector< vector<double> > > > tabGrand(tabTau4(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, Njterme, d ));
 	vector< vector < vector< vector<double> > > >  tabPetit(Njterme+1, vector< vector < vector<double> > >(Nkterme+1, vector< vector<double> >(Nlterme+1, vector<double>(Nmterme +1))));
@@ -358,6 +379,10 @@ vector< vector< vector< vector<double> > > > recopieTau4(int NiTau2, int NjTau2,
 	}
 	return tabPetit;
 }
+
+//returns a 5-dimensional array of size Niterme +1 * Njterme +1 * Nkterme + 1 * Nlterme + 1 * Nmterme + 1
+//element [i,j,k,l,m] is a bound on T_{i, j, k, l,m}
+//as the previous functions, the border are bounded roughly in order to be able to apply the backward inequality
 vector< vector< vector< vector< vector<double> > > > > tabTau5(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Niterme, int Njterme, int Nkterme, int Nlterme, int Nmterme, int NiNeeded, int d ){
 	
 	cout << "debut"  << endl;
@@ -399,7 +424,7 @@ vector< vector< vector< vector< vector<double> > > > > tabTau5(int NiTau2, int N
 				}
 			}
 		}
-    	}
+    }
 
 	vector <vector< vector < vector< vector<double> > > > > tab(NiNeeded+1, vector< vector< vector< vector<double> > >>(Njterme+1, vector< vector < vector<double> > >(Nkterme+1, vector< vector<double> >(Nlterme+1, vector<double>(Nmterme +1)))));
 	cout << "fin creation tabTau5"  << endl;
@@ -458,17 +483,25 @@ vector< vector< vector< vector< vector<double> > > > > tabTau5(int NiTau2, int N
     	}
 	return tab;
 }
+
+//encapsulates the previous function
 double Tau5(int NiTau2, int NjTau2, int NiTau3, int NjTau3, int NkTau3, int NiTau4, int NjTau4, int NkTau4, int NlTau4, int Niterme, int Njterme, int Nkterme, int Nlterme, int Nmterme, int d ){
 
 	vector <vector< vector < vector< vector<double> > > > > tab(tabTau5(NiTau2, NjTau2, NiTau3, NjTau3, NkTau3, NiTau4, NjTau4, NkTau4, NlTau4, Niterme, Njterme, Nkterme, Nlterme, Nmterme,1, d));
 	return tab[1][0][0][0][0];
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////// From there the code is no longer relevant for the main part of our article                  ////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////// It is for a related work using similar ideas and briefy mentionnes at the end of our article////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 double borne_Tau_i_0(int Niterme){
 	double A=0.787064;
     double borne_fine=sqrt(3 *M_PI)/sqrt(Niterme)+3.0/(Niterme*A)*exp(-Niterme*A*A/3);
     return borne_fine;
 }
+
 //renvoie i=un tableau de taille Niterme+1 par Njterme +1
 vector< vector<double> > tabDeltaTau12(int Niterme, int Njterme, int d ){
     vector< vector<double> > tab(Niterme+1, vector<double>(Njterme+1));
